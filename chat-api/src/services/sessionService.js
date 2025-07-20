@@ -13,3 +13,10 @@ export async function getAllSessions(supabase) {
     .select('*')
     .order('created_at', { ascending: false });
 }
+export async function getSessionById(supabase, id) {
+  return await supabase
+    .from('chat_sessions')
+    .select('*')
+    .eq('id', id)
+    .single();
+}
