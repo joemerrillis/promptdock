@@ -39,7 +39,7 @@ export default function SessionSelector({ currentSession, setCurrentSession }) {
               onClick={() => setCurrentSession(s)}
               className={`block w-full text-left px-2 py-1 rounded ${currentSession?.id === s.id ? 'bg-blue-100' : ''}`}
             >
-              {s.title}
+              {s.title} ({s.model})
             </button>
           </li>
         ))}
