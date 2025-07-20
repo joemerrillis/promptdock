@@ -3,38 +3,47 @@ import axios from 'axios';
 
 export default function SessionSelector({ currentSession, setCurrentSession }) {
   const [sessions, setSessions] = useState([]);
+  const [title, setTitle] = useState('');
+  const [model, setModel] = useState('gpt-4');
 
   useEffect(() => {
-    axios.get('/sessions').then((res) => setSessions(res.data));
-  }, []);
+    axios.get('/session').then((res) => setSessions(res.data.chat_sessions));
+  }, [currentSession]);
 
   const createSession = async () => {
-    const title = prompt('Enter session title:');
-    if (!title) return;
-    const res = await axios.post('/session', { title });
-    setSessions([...sessions, res.data]);
-    setCurrentSession(res.data);
+    const res = await axios.post('/session', {
+      title,
+      model,
+    });
+    setCurrentSession(res.data.session);
+    setTitle('');
+    setModel('gpt-4');
   };
 
   return (
-    <div className="mb-2">
-      <label className="block text-sm font-bold mb-1">💬 Session</label>
-      <select
-        className="w-full border rounded p-1"
-        value={currentSession?.id || ''}
-        onChange={(e) => {
-          const selected = sessions.find((s) => s.id === e.target.value);
-          setCurrentSession(selected);
-        }}
-      >
-        <option value="">Select session</option>
-        {sessions.map((s) => (
-          <option key={s.id} value={s.id}>{s.title || 'Untitled'}</option>
+    <div>
+      <h2 className="font-bold mb-2">Sessions</h2>
+      <div className="flex gap-2 mb-2">
+        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Session title" className="border p-1 rounded" />
+        <select value={model} onChange={e => setModel(e.target.value)} className="border p-1 rounded">
+          <option value="gpt-4">gpt-4</option>
+          <option value="gpt-4o">gpt-4o</option>
+          <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+        </select>
+        <button onClick={createSession} className="bg-blue-500 text-white px-2 rounded">New</button>
+      </div>
+      <ul>
+        {sessions.map(s => (
+          <li key={s.id}>
+            <button
+              onClick={() => setCurrentSession(s)}
+              className={`block w-full text-left px-2 py-1 rounded ${currentSession?.id === s.id ? 'bg-blue-100' : ''}`}
+            >
+              {s.title}
+            </button>
+          </li>
         ))}
-      </select>
-      <button className="mt-1 text-blue-600 text-xs underline" onClick={createSession}>
-        + New Session
-      </button>
+      </ul>
     </div>
   );
 }
