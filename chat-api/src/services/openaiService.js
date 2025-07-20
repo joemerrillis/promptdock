@@ -5,16 +5,26 @@ const openai = new OpenAI({
 });
 
 // Chat Completion (used by /chat and /debug)
-export async function callOpenAIChat(prompt) {
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4',
-    messages: [
-      { role: 'system', content: 'You are a helpful code assistant.' },
-      { role: 'user', content: prompt },
-    ],
-  });
+export async function callOpenAIChat(model, prompt) {
+  try {
+    const response = await openai.chat.completions.create({
+      model,
+      messages: [
+        { role: 'system', content: 'You are a helpful code assistant.' },
+        { role: 'user', content: prompt },
+      ],
+    });
 
-  return response.choices[0].message.content.trim();
+    return {
+      result: response.choices[0].message.content.trim(),
+      error: null
+    };
+  } catch (err) {
+    return {
+      result: null,
+      error: err.message || 'OpenAI API error'
+    };
+  }
 }
 
 // Embedding Generation (used by /prime)
