@@ -3,10 +3,12 @@ import FileTreeSelector from '../components/FileTreeSelector';
 import ChatWindow from '../components/ChatWindow';
 import LogViewer from '../components/LogViewer';
 import SessionSelector from '../components/SessionSelector';
+import RepoSelector from '../components/RepoSelector'; // ✅ NEW
 
 export default function MainLayout() {
   const [primedFiles, setPrimedFiles] = useState([]);
   const [currentSession, setCurrentSession] = useState(null);
+  const [currentRepo, setCurrentRepo] = useState(''); // ✅ NEW
 
   return (
     <div className="grid grid-cols-12 h-screen bg-white text-gray-900">
@@ -17,7 +19,14 @@ export default function MainLayout() {
           currentSession={currentSession}
           setCurrentSession={setCurrentSession}
         />
-        <FileTreeSelector onPrime={setPrimedFiles} />
+        <RepoSelector
+          currentRepo={currentRepo}
+          setCurrentRepo={setCurrentRepo}
+        />
+        <FileTreeSelector
+          repo={currentRepo} // ✅ Pass repo to file tree
+          onPrime={setPrimedFiles}
+        />
       </div>
 
       {/* Main Chat - Center */}
