@@ -9,6 +9,7 @@ import debugRoute from './src/routes/debug.js';
 import sessionRoute from './src/routes/session.js';
 import chatMessageRoute from './src/routes/chatMessage.js';
 import messagesRoute from './src/routes/messages.js';
+import githubRoutes from './routes/githubRoutes.js';
 
 const fastify = Fastify({ logger: true });
 
@@ -31,6 +32,7 @@ await fastify.register(debugRoute);
 await fastify.register(sessionRoute);
 await fastify.register(chatMessageRoute);
 await fastify.register(messagesRoute);
+await fastify.register(githubRoutes, { prefix: '/github' });
 
 // Health check
 fastify.get('/health', async () => ({ status: 'ok' }));
