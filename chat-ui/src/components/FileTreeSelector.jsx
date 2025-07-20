@@ -6,7 +6,7 @@ export default function FileTreeSelector({ onPrime }) {
   const [selected, setSelected] = useState([]);
 
   useEffect(() => {
-    fetch('/filelist.json') // this can be a static mock or GitHub API later
+    fetch('/filelist.json')
       .then((res) => res.json())
       .then(setFiles);
   }, []);
