@@ -1,18 +1,17 @@
-export default async function sessionRoute(fastify) {
+// FILE: src/routes/session.js
+import { createSession, getAllSessions } from '../services/sessionService.js';
+
+export default async function sessionRoutes(fastify) {
+  fastify.get('/session', async (req, reply) => {
+    const { data, error } = await getAllSessions(fastify.supabase);
+    if (error) return reply.status(500).send({ error });
+    return { chat_sessions: data };
+  });
+
   fastify.post('/session', async (req, reply) => {
-    const { title, mode = 'build', context_files = [] } = req.body;
-
-    const { data, error } = await fastify.supabase
-      .from('chat_sessions')
-      .insert([{ title, mode, context_files }])
-      .select()
-      .single();
-
-    if (error) {
-      req.log.error(error);
-      return reply.status(500).send({ error: 'Failed to create session' });
-    }
-
-    reply.send(data);
+    const { title, model } = req.body;
+    const { data, error } = await createSession(fastify.supabase, title, model);
+    if (error) return reply.status(500).send({ error });
+    return { session: data };
   });
 }
