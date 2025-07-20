@@ -9,7 +9,8 @@ import debugRoute from './src/routes/debug.js';
 import sessionRoute from './src/routes/session.js';
 import chatMessageRoute from './src/routes/chatMessage.js';
 import messagesRoute from './src/routes/messages.js';
-import githubRoutes from './routes/githubRoutes.js';
+import githubRoutes from './src/routes/githubRoutes.js';
+
 
 const fastify = Fastify({ logger: true });
 
