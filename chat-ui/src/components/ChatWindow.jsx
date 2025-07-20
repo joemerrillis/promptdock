@@ -1,16 +1,45 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-export default function ChatWindow({ contextFiles }) {
+export default function ChatWindow({ contextFiles, currentSession }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
 
+  useEffect(() => {
+    if (!currentSession?.id) return;
+    axios.get(`/messages/${currentSession.id}`).then((res) => setMessages(res.data));
+  }, [currentSession]);
+
   const sendMessage = async () => {
-    const res = await axios.post('/chat', {
+    if (!input || !currentSession?.id) return;
+
+    const chatRes = await axios.post('/chat', {
       message: input,
       context_files: contextFiles,
     });
-    setMessages([...messages, { role: 'user', text: input }, { role: 'assistant', text: res.data.reply }]);
+
+    const aiReply = chatRes.data.reply;
+    setMessages(prev => [
+      ...prev,
+      { role: 'user', text: input },
+      { role: 'assistant', text: aiReply },
+    ]);
+
+    await axios.post('/chat-message', {
+      session_id: currentSession.id,
+      role: 'user',
+      message: input,
+      response: null,
+      context: { context_files: contextFiles }
+    });
+    await axios.post('/chat-message', {
+      session_id: currentSession.id,
+      role: 'assistant',
+      message: input,
+      response: aiReply,
+      context: { context_files: contextFiles }
+    });
+
     setInput('');
   };
 
@@ -20,10 +49,10 @@ export default function ChatWindow({ contextFiles }) {
         {messages.map((msg, i) => (
           <div key={i} className={`p-2 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
             <div className="bg-gray-100 rounded p-2 inline-block max-w-full">
-              <pre className="whitespace-pre-wrap text-xs">{msg.text}</pre>
+              <pre className="whitespace-pre-wrap text-xs">{msg.text || msg.message || msg.response}</pre>
               <button
                 className="text-xs text-blue-600 underline mt-1 block"
-                onClick={() => navigator.clipboard.writeText(msg.text)}
+                onClick={() => navigator.clipboard.writeText(msg.text || msg.message || msg.response)}
               >Copy</button>
             </div>
           </div>
