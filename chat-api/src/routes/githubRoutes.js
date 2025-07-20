@@ -1,26 +1,27 @@
 import axios from 'axios';
 
 export default async function githubRoutes(fastify) {
-  fastify.get('/repo/tree', async (req, reply) => {
-    const { owner, repo, path = '' } = req.query;
-
+  fastify.get('/github/repos', async (req, reply) => {
+    const username = 'YOUR_GITHUB_USERNAME'; // 🔁 optionally dynamic
     const token = process.env.GITHUB_TOKEN;
-    if (!token) return reply.status(500).send({ error: 'Missing GitHub token' });
 
     try {
-      const res = await axios.get(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await axios.get(`https://api.github.com/users/${username}/repos`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.github+json',
+        },
       });
 
-      const files = res.data.map(entry => ({
-        name: entry.name,
-        path: entry.path,
-        type: entry.type, // 'file' or 'dir'
+      const repos = res.data.map(repo => ({
+        name: repo.name,
+        full_name: repo.full_name,
       }));
 
-      reply.send({ files });
-    } catch (err) {
-      reply.status(500).send({ error: 'GitHub API error', details: err.message });
+      return reply.send({ repos });
+    } catch (error) {
+      req.log.error(error);
+      reply.status(500).send({ error: 'Failed to fetch GitHub repos' });
     }
   });
 }
