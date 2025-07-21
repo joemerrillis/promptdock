@@ -1,26 +1,43 @@
+// chat-api/src/routes/githubRoutes.js
 import axios from 'axios';
 
 export default async function githubRoutes(fastify) {
-  fastify.get('/github/repos', async (req, reply) => {
-    const username = 'YOUR_GITHUB_USERNAME'; // 🔁 optionally dynamic
-    const token = process.env.GITHUB_TOKEN;
-
+  fastify.get('/repos', async (req, reply) => {
     try {
-      const res = await axios.get(`https://api.github.com/users/${username}/repos`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/vnd.github+json',
-        },
-      });
+      const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+      const graphqlQuery = {
+        query: `
+          {
+            viewer {
+              repositories(first: 100, isFork: false, orderBy: {field: UPDATED_AT, direction: DESC}) {
+                nodes {
+                  name
+                  nameWithOwner
+                  isPrivate
+                  isFork
+                  isArchived
+                }
+              }
+            }
+          }
+        `,
+      };
 
-      const repos = res.data.map(repo => ({
-        name: repo.name,
-        full_name: repo.full_name,
-      }));
+      const res = await axios.post(
+        'https://api.github.com/graphql',
+        graphqlQuery,
+        {
+          headers: {
+            Authorization: `Bearer ${GITHUB_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      return reply.send({ repos });
-    } catch (error) {
-      req.log.error(error);
+      const repos = res.data?.data?.viewer?.repositories?.nodes || [];
+      reply.send({ repos });
+    } catch (err) {
+      req.log.error(err);
       reply.status(500).send({ error: 'Failed to fetch GitHub repos' });
     }
   });
