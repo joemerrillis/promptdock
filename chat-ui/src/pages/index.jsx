@@ -1,3 +1,5 @@
+// chat-ui/src/pages/index.jsx
+
 import React, { useState } from 'react';
 import FileTreeSelector from '../components/FileTreeSelector';
 import ChatWindow from '../components/ChatWindow';
@@ -12,19 +14,21 @@ export default function MainLayout() {
 
   return (
     <div className="grid grid-cols-12 h-screen bg-white text-gray-900">
-      
+
       {/* Sidebar - Left */}
       <div className="col-span-3 p-4 border-r overflow-y-auto">
         <SessionSelector
           currentSession={currentSession}
           setCurrentSession={setCurrentSession}
         />
+
         <RepoSelector
           currentRepo={currentRepo}
           setCurrentRepo={setCurrentRepo}
         />
+
         <FileTreeSelector
-          repo={currentRepo} // ✅ Pass repo to file tree
+          repo={currentRepo}       // ✅ Forward repo name to file selector
           onPrime={setPrimedFiles}
         />
       </div>
