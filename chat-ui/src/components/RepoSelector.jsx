@@ -1,43 +1,29 @@
+// chat-ui/src/components/RepoSelector.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-export default function RepoSelector({ currentRepo, setCurrentRepo }) {
+export default function RepoSelector({ selectedRepo, setSelectedRepo }) {
   const [repos, setRepos] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchRepos() {
-      try {
-        const res = await axios.get('/github/repos');
-        setRepos(res.data.repos);
-      } catch (err) {
-        console.error('Failed to fetch repos:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchRepos();
+    axios.get('/github/repos').then((res) => setRepos(res.data.repos));
   }, []);
 
   return (
-    <div className="mb-4">
-      <h2 className="font-bold mb-2">GitHub Repos</h2>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <select
-          className="border p-1 rounded w-full"
-          value={currentRepo || ''}
-          onChange={e => setCurrentRepo(e.target.value)}
-        >
-          <option value="">Select a repo...</option>
-          {repos.map(repo => (
-            <option key={repo.full_name} value={repo.full_name}>
-              {repo.full_name}
-            </option>
-          ))}
-        </select>
-      )}
+    <div className="mt-4">
+      <h2 className="font-bold mb-1">Repository</h2>
+      <select
+        value={selectedRepo || ''}
+        onChange={(e) => setSelectedRepo(e.target.value)}
+        className="w-full border rounded p-1"
+      >
+        <option value="">Select a repository...</option>
+        {repos.map((repo) => (
+          <option key={repo.nameWithOwner} value={repo.nameWithOwner}>
+            {repo.nameWithOwner} {repo.isPrivate ? '(Private)' : ''}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
